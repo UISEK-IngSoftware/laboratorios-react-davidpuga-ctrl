@@ -2,8 +2,9 @@
     margin-bottom: 50px;
 }
 .pokedex-navbar .MuiAppBar-root{
-    background-color: #ce8d2c87;
+    background-color: #54b99c;
 }
+
 .image-container {
     display: flex;
     justify-content: center;

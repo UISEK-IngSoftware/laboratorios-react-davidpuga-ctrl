@@ -1,5 +1,5 @@
-import { AppBar, Container, Toolbar, Button } from "@mui/material"; // ¡Añadir Button!
-import pokedexLogo from "../assets/pokedex_logo.png";
+import { AppBar, Container, Toolbar, Button } from "@mui/material"; 
+import pokedexLogo from "../assets/pokedex_logo.svg";
 import "./Header.css";
 
 export default function Header() {
@@ -14,10 +14,12 @@ export default function Header() {
                             </div>
                         </Toolbar>
                         <Toolbar>
-                        <Container>
-                            <Button color="inherit" href="/">Inicio</Button>
-                            <Button color="inherit" href="/add-pokemon">Agregar Pokemon</Button>
-                        </Container>
+                            <Container>
+                                <Button color="inherit" href="/">Inicio</Button>
+                                <Button color="inherit" href="/add-pokemon">Agregar Pokemon</Button>
+                                {/* Botón simple igual a los anteriores */}
+                                <Button color="inherit" href="/login">Iniciar Sesión</Button>
+                            </Container>
                         </Toolbar>
                     </AppBar>
                 </div>
