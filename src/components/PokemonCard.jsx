@@ -9,7 +9,6 @@ export default function PokemonCard({ pokemon }) {
             <CardMedia
                 component="img"
                 height={200}
-                // Usamos la URL completa que ya viene de la API
                 image={pokemonImageUrl}
                 alt={pokemon.name}
             />
