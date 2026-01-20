@@ -3,42 +3,64 @@
 import React, { useEffect, useState } from 'react';
 import { Grid } from '@mui/material';
 import PokemonCard from '../src/components/PokemonCard';
-import { fetchPokemons } from '../src/services/PokemonService'; 
+import {
+    fetchPokemons,
+    deletePokemon
+} from '../src/services/PokemonService';
 
 export default function PokemonList() {
     const [pokemons, setPokemons] = useState([]);
 
     useEffect(() => {
-        fetchPokemons()
-            .then((data) => {
-                // CORRECCIÓN FINAL: Si la respuesta es un ARRAY directo, usa data.
-                if (Array.isArray(data)) {
-                     setPokemons(data); 
-                } 
-                // Si tienes alguna vista con paginación que use 'results', puedes descomentar lo siguiente:
-                /* else if (data && Array.isArray(data.results)) {
-                     setPokemons(data.results); 
-                } */ 
-                else {
-                    console.error('La API no devolvió un array directo. Respuesta:', data);
-                    setPokemons([]);
-                }
-            })
-            .catch((error) => {
-                console.error('Error obteniendo los pokemons:', error);
-                alert("Error obteniendo los pokemons. Verifica el servidor.");
-            });
-    }, []); 
+        loadPokemons();
+    }, []);
+
+    const loadPokemons = async () => {
+        try {
+            const data = await fetchPokemons();
+            if (Array.isArray(data)) {
+                setPokemons(data);
+            } else {
+                console.error("Respuesta inesperada:", data);
+                setPokemons([]);
+            }
+        } catch (error) {
+            console.error("Error obteniendo los pokemons:", error);
+            alert("Error obteniendo los pokemons");
+        }
+    };
+
+    // 🔥 FUNCIÓN CLAVE PARA ELIMINAR
+    const handleDelete = async (id) => {
+        try {
+            await deletePokemon(id);
+
+            // ✅ Eliminación inmediata en el frontend
+            setPokemons(prev =>
+                prev.filter(pokemon => pokemon.id !== id)
+            );
+        } catch (error) {
+            console.error("Error eliminando el Pokémon:", error);
+            alert("No se pudo eliminar el Pokémon");
+        }
+    };
 
     return (
         <Grid container spacing={2}>
-            {Array.isArray(pokemons) && pokemons.map(
-                (pokemon, index) => (
-                    <Grid item key={pokemon.id || index} xs={12} sm={6} md={4}> 
-                        <PokemonCard pokemon={pokemon} />
-                    </Grid>
-                )
-            )}
+            {pokemons.map((pokemon) => (
+                <Grid
+                    item
+                    key={pokemon.id}
+                    xs={12}
+                    sm={6}
+                    md={4}
+                >
+                    <PokemonCard
+                        pokemon={pokemon}
+                        onDelete={handleDelete}   // ✅ AQUÍ ESTABA EL ERROR
+                    />
+                </Grid>
+            ))}
         </Grid>
     );
 }

@@ -1,110 +1,167 @@
-import { Box, TextField, Typography, Button, Container } from '@mui/material'; 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import { createPokemon } from '../src/services/PokemonService';
+import { Box, TextField, Typography, Button } from "@mui/material";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import {
+  createPokemon,
+  updatePokemon,
+  fetchPokemonById,
+} from "../src/services/PokemonService";
+
+import { isAuthenticated } from "../src/services/userService";
 
 export default function PokemonForm() {
-  // 1. Estado para capturar los datos (Igual al de tu amigo)
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+
   const [pokemonData, setPokemonData] = useState({
-    name: '',
-    type: '',
-    weight: '',
-    height: '',
+    name: "",
+    type: "",
+    weight: "",
+    height: "",
     picture: null,
   });
 
-  const navigate = useNavigate();
+  const [preview, setPreview] = useState(null);
 
-  // 2. Manejador de cambios (Corregido para que funcione con los nombres de los inputs)
+  /* PRECARGA EN EDICIÓN */
+  useEffect(() => {
+    if (isEdit) {
+      fetchPokemonById(id).then((data) => {
+        setPokemonData({
+          name: data.name,
+          type: data.type,
+          weight: data.weight,
+          height: data.height,
+          picture: null,
+        });
+
+        if (data.picture) {
+          setPreview(data.picture); // 👈 imagen existente
+        }
+      });
+    }
+  }, [id, isEdit]);
+
+  /* CAMBIOS EN INPUTS */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     if (name === "picture") {
-      setPokemonData({
-        ...pokemonData,
-        picture: files[0] // Captura el archivo de imagen
-      });
+      const file = files[0];
+      setPokemonData({ ...pokemonData, picture: file });
+
+      if (file) {
+        setPreview(URL.createObjectURL(file)); // 👈 preview nueva imagen
+      }
     } else {
-      setPokemonData({
-        ...pokemonData,
-        [name]: value
-      });
+      setPokemonData({ ...pokemonData, [name]: value });
     }
   };
 
-  // 3. Función de envío (Ahora fuera de handleChange, como debe ser)
+  /* GUARDAR */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isAuthenticated()) {
+      alert("Debes iniciar sesión para continuar.");
+      navigate("/login");
+      return;
+    }
+
     try {
-      await createPokemon(pokemonData);
-      alert("¡Pokemon creado con éxito!");
-      navigate('/'); 
+      if (isEdit) {
+        await updatePokemon(id, pokemonData);
+        alert("¡Pokémon actualizado con éxito!");
+      } else {
+        await createPokemon(pokemonData);
+        alert("¡Pokémon creado con éxito!");
+      }
+      navigate("/");
     } catch (error) {
-      console.error("Error al crear el Pokémon:", error);
-      alert("Hubo un error al crear el Pokémon."); 
+      alert("Hubo un error al guardar el Pokémon.");
     }
   };
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h5" gutterBottom>
-        Formulario de Pokemon
+        {isEdit ? "Editar Pokémon" : "Formulario de Pokémon"}
       </Typography>
 
-      <Box 
-        component="form" 
-        onSubmit={handleSubmit} 
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
         sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 400 }}
       >
-        <TextField 
-          label="Nombre" 
-          name="name" // IMPORTANTE: El 'name' debe coincidir con el estado
-          variant="outlined" 
+        <TextField
+          label="Nombre"
+          name="name"
           value={pokemonData.name}
-          onChange={handleChange} 
+          onChange={handleChange}
           required
         />
-        <TextField 
-          label="Tipo" 
-          name="type" 
-          variant="outlined" 
-          value={pokemonData.type}
-          onChange={handleChange} 
-          required
-        />
-        <TextField 
-          label="Peso" 
-          name="weight" 
-          variant="outlined" 
-          type="number" 
-          value={pokemonData.weight}
-          onChange={handleChange} 
-          required
-        />
-        <TextField 
-          label="Altura" 
-          name="height" 
-          variant="outlined" 
-          type="number" 
-          value={pokemonData.height}
-          onChange={handleChange} 
-          required
-        />
-        
-        <Typography variant="body2" sx={{ mt: 1 }}>Foto del Pokemon:</Typography>
-        <input 
-          type="file" 
-          name="picture" 
-          accept="image/*" 
-          onChange={handleChange} 
-          required
-        /> 
 
-        <Button 
-          type="submit" 
-          variant="contained" 
+        <TextField
+          label="Tipo"
+          name="type"
+          value={pokemonData.type}
+          onChange={handleChange}
+          required
+        />
+
+        <TextField
+          label="Peso"
+          name="weight"
+          type="number"
+          value={pokemonData.weight}
+          onChange={handleChange}
+          required
+        />
+
+        <TextField
+          label="Altura"
+          name="height"
+          type="number"
+          value={pokemonData.height}
+          onChange={handleChange}
+          required
+        />
+
+        <Typography variant="body2">Foto del Pokémon:</Typography>
+
+        <input
+          type="file"
+          name="picture"
+          accept="image/*"
+          onChange={handleChange}
+          required={!isEdit}
+        />
+
+        {/* 🔥 PREVIEW */}
+        {preview && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <img
+              src={preview}
+              alt="Vista previa"
+              style={{
+                width: 150,
+                height: 150,
+                objectFit: "contain",
+                borderRadius: 8,
+                border: "1px solid #ddd",
+              }}
+            />
+          </Box>
+        )}
+
+        <Button
+          type="submit"
+          variant="contained"
           sx={{ mt: 2, backgroundColor: "#4479cc" }}
         >
-          Guardar Pokemon
+          {isEdit ? "Actualizar Pokémon" : "Guardar Pokémon"}
         </Button>
       </Box>
     </Box>
