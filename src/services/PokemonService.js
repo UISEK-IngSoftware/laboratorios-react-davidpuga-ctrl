@@ -1,7 +1,11 @@
 import axios from "axios";
 
+<<<<<<< HEAD
 // Si la variable de entorno no existe, usamos la URL local de Django por defecto
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/pokedex";
+=======
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+>>>>>>> f2fa6f3543a4b05dd167f640ecdb5ce47c5ae06c
 
 /* ===========================
    INTERCEPTOR (TOKEN OAUTH)
@@ -18,7 +22,10 @@ axios.interceptors.request.use((config) => {
    OBTENER TODOS
 =========================== */
 export async function fetchPokemons() {
+<<<<<<< HEAD
   // Ahora usamos la URL completa corregida
+=======
+>>>>>>> f2fa6f3543a4b05dd167f640ecdb5ce47c5ae06c
   const response = await axios.get(`${API_BASE_URL}/pokemons/`);
   return response.data;
 }
@@ -95,4 +102,8 @@ export async function deletePokemon(id) {
 
   const response = await axios.delete(`${API_BASE_URL}/pokemons/${id}/`);
   return response;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> f2fa6f3543a4b05dd167f640ecdb5ce47c5ae06c
