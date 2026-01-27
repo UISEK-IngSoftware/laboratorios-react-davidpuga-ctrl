@@ -1,0 +1,5 @@
+html, body, #root{
+  margin: auto;
+  padding: auto;
+  height: 100%;
+}
